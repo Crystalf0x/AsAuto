@@ -40,7 +40,3 @@ class MyUserAdmin(UserAdmin):
         }),
     )
 
-
-
-# Register your models here.
-
