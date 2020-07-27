@@ -23,6 +23,6 @@ urlpatterns = [
     path('camping/', include('camping.urls')),
     path('users/', include('users.urls')),
 
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

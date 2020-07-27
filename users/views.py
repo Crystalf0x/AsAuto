@@ -1,24 +1,27 @@
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.shortcuts import render, reverse
 from django.contrib.auth import authenticate, login, logout
-from users.forms import LoginForm
 from django.http import HttpResponseRedirect
-from django.urls import reverse
-from users.forms import RegisterForm
+from django.template.loader import get_template
+from users.forms import LoginForm, UploadFileForm, UploadProfileImage
+from users.admin import MyUserCreationForm
+from helpers.upload import handle_upload_file
 
 
-# Create your views here.
 def handle_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
 
         if form.is_valid():
-            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
+            user = authenticate(request, username=email, password=password)
 
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect(reverse('parts:parts'))
+                return HttpResponseRedirect(reverse('users:profile'))
     else:
         form = LoginForm()
 
@@ -32,8 +35,86 @@ def handle_logout(request):
     return HttpResponseRedirect(reverse('users:login'))
 
 
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        user_profile = request.user.profile
+        form = UploadProfileImage(request.POST, request.FILES, instance=user_profile)
+
+        if form.is_valid():
+            user_profile = form.save(commit=False)
+            user_profile.user = request.user
+            user_profile.save()
+
+            return HttpResponseRedirect(reverse('users:profile'))
+    else:
+        request.session['cart_items'] = 12
+        form = UploadProfileImage()
+
+    return render(request, 'users/profile.html', {
+        'form': form
+    })
+
+
+@login_required
+def profile_email(request):
+    if settings.IS_PRODUCTION:
+        avatar_path = '{MEDIA_ROOT}/{PROFILE_IMAGE}'.format(
+            MEDIA_ROOT=settings.MEDIA_ROOT,
+            PROFILE_IMAGE=request.user.profile.avatar
+        )
+    else:
+        avatar_path = '{BASE_DIR}/{MEDIA_ROOT}/{PROFILE_IMAGE}'.format(
+            BASE_DIR=settings.BASE_DIR,
+            MEDIA_ROOT=settings.MEDIA_ROOT,
+            PROFILE_IMAGE=request.user.profile.avatar
+        )
+
+    email_template = get_template('users/email.html')
+    email_content = email_template.render({
+        'first_name': request.user.first_name,
+        'last_name': request.user.last_name,
+    })
+
+    mail = EmailMultiAlternatives(
+        'Your profile data request',
+        email_content,
+        settings.EMAIL_HOST_USER,
+        [request.user.email]
+    )
+    mail.content_subtype = 'html'
+    mail.attach_file(avatar_path)
+    mail.send()
+
+    return HttpResponseRedirect(reverse('users:profile'))
+
+
 def register(request):
-    form = RegisterForm()
+    if request.method == 'POST':
+        form = MyUserCreationForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+
+            return HttpResponseRedirect(reverse('users:login'))
+    else:
+        form = MyUserCreationForm()
+
     return render(request, 'users/register.html', {
+        'form': form
+    })
+
+
+def upload(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            my_file = form.cleaned_data['my_file']
+            handle_upload_file(my_file)
+    else:
+        form = UploadFileForm()
+
+    return render(request, 'users/upload.html', {
         'form': form
     })
