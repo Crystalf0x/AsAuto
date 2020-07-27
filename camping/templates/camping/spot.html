@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a  href="{% url 'users:logout' %}">Logout</a>
+<a  href="{% url 'users:login' %}">Login</a>
+
+<h1>Accommodation page</h1>
+{% for item in spot_view %}
+
+{{ item.name }}
+{{ item.description }}
+{% if item.image %}
+<img src="{{ MEDIA_URL }}{{ item.image }}">
+{% endif %}
+{{ item.user_id }}
+{{ item.created }}
+{{ item.status }}
+
+
+{% endfor %}
+</body>
+</html>

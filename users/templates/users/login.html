@@ -6,12 +6,11 @@
 </head>
 <body>
 
-<form  action="{% url 'users:login' %}" method="post">
-
-            {{ form  }}
-            {% csrf_token %}
-            <input type="submit" value="Login">
-        </form>
+<form method="post" action="{% url 'users:login' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Login" />
+</form>
 
 </body>
 </html>
