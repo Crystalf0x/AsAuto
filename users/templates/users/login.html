@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 
 <form method="post" action="{% url 'users:login' %}">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Login" />
+    <input type="submit" value="Login"/>
 </form>
 
-</body>
-</html>
+<p>
+    <a href="{% url 'social:begin' 'facebook' %}">Facebook</a>
+</p>
+<p>
+    <a href="{% url 'social:begin' 'google-oauth2' %}">Google+</a>
+</p>

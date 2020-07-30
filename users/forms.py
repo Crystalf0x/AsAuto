@@ -1,3 +1,4 @@
+
 from django import forms
 from users.models import MyUser, Profile
 from django.contrib.auth import password_validation
@@ -35,7 +36,7 @@ class RegisterForm(forms.Form):
         users = MyUser.objects.filter(email=email)
 
         if users.count() != 0:
-            raise forms.ValidationError('E-mai already exists.')
+            raise forms.ValidationError('E-mail already exists.')
 
         return email
 
@@ -44,7 +45,7 @@ class RegisterForm(forms.Form):
         password_confirm = self.cleaned_data['password_confirm']
 
         if password_confirm != password:
-            raise forms.ValidationError("Password confirm doesn't match")
+            raise forms.ValidationError("Password confirm doesn't match.")
 
         return password_confirm
 
@@ -69,7 +70,6 @@ class UploadProfileImage(forms.ModelForm):
         model = Profile
         fields = ['avatar']
 
-
 class SetPassword(forms.Form):
     password = forms.CharField(
         required=True,
@@ -82,11 +82,13 @@ class SetPassword(forms.Form):
         super().__init__(*args, **kwargs)
         self.user = user
 
+
     def clean_password(self):
         password = self.cleaned_data.get('password')
         password_validation.validate_password(password, self.user)
 
         return password
+
 
     def clean_password_confirmation(self):
         password = self.cleaned_data.get('password')
@@ -97,6 +99,7 @@ class SetPassword(forms.Form):
 
         return password_confirmation
 
+
     def save(self, commit=True):
         password = self.cleaned_data.get('password')
         self.user.set_password(password)
@@ -105,3 +108,5 @@ class SetPassword(forms.Form):
             self.user.save()
 
         return self.user
+
+

@@ -1,13 +1,14 @@
+from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import render, reverse
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect
-from django.template.loader import get_template
 from users.forms import LoginForm, UploadFileForm, UploadProfileImage
+from django.http import HttpResponseRedirect
 from users.admin import MyUserCreationForm
 from helpers.upload import handle_upload_file
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
+from django.template.loader import get_template
 
 
 def handle_login(request):
@@ -20,7 +21,12 @@ def handle_login(request):
             user = authenticate(request, username=email, password=password)
 
             if user is not None:
-                login(request, user)
+                print('************************')
+                print('************************')
+                print('************************')
+                print('************************')
+                print('settings.DJANGO_AUTH_BACKEND', settings.DJANGO_AUTH_BACKEND)
+                login(request, user, backend=settings.DJANGO_AUTH_BACKEND)
                 return HttpResponseRedirect(reverse('users:profile'))
     else:
         form = LoginForm()
@@ -47,10 +53,9 @@ def profile(request):
             user_profile.save()
 
             return HttpResponseRedirect(reverse('users:profile'))
-    else:
-        request.session['cart_items'] = 12
-        form = UploadProfileImage()
 
+    else:
+        form = UploadProfileImage()
     return render(request, 'users/profile.html', {
         'form': form
     })
@@ -58,24 +63,11 @@ def profile(request):
 
 @login_required
 def profile_email(request):
-    if settings.IS_PRODUCTION:
-        avatar_path = '{MEDIA_ROOT}/{PROFILE_IMAGE}'.format(
-            MEDIA_ROOT=settings.MEDIA_ROOT,
-            PROFILE_IMAGE=request.user.profile.avatar
-        )
-    else:
-        avatar_path = '{BASE_DIR}/{MEDIA_ROOT}/{PROFILE_IMAGE}'.format(
-            BASE_DIR=settings.BASE_DIR,
-            MEDIA_ROOT=settings.MEDIA_ROOT,
-            PROFILE_IMAGE=request.user.profile.avatar
-        )
-
     email_template = get_template('users/email.html')
     email_content = email_template.render({
         'first_name': request.user.first_name,
         'last_name': request.user.last_name,
     })
-
     mail = EmailMultiAlternatives(
         'Your profile data request',
         email_content,
@@ -83,7 +75,11 @@ def profile_email(request):
         [request.user.email]
     )
     mail.content_subtype = 'html'
-    mail.attach_file(avatar_path)
+    mail.attach_file('{BASE_DIR}/{MEDIA_ROOT}/{PROFILE_IMAGE}'.format(
+        BASE_DIR=settings.BASE_DIR,
+        MEDIA_ROOT=settings.MEDIA_ROOT,
+        PROFILE_IMAGE=request.user.profile.avatar
+    ))
     mail.send()
 
     return HttpResponseRedirect(reverse('users:profile'))
@@ -112,9 +108,13 @@ def upload(request):
         if form.is_valid():
             my_file = form.cleaned_data['my_file']
             handle_upload_file(my_file)
+            return render(request, 'users/upload.html', {
+                'form' : form
+            })
+
     else:
         form = UploadFileForm()
-
     return render(request, 'users/upload.html', {
         'form': form
     })
+

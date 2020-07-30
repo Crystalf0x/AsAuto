@@ -1,12 +1,11 @@
-import os
 from django.conf import settings
+import os
 from uuid import uuid4
 
 
-def handle_upload_file(file):
+def handle_upload_file(file) :
     random_filename = uuid4()
     _, os_file_extension = os.path.splitext(file.name)
-
     path = '{BASE_DIR}/{MEDIA_ROOT}/uploads/{FILENAME}'.format(
         BASE_DIR=settings.BASE_DIR,
         MEDIA_ROOT=settings.MEDIA_ROOT,
@@ -15,6 +14,6 @@ def handle_upload_file(file):
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
-    with open(path, 'wb+') as destination:
-        for chunk in file.chunks():
+    with open(path, 'wb+') as destination :
+        for chunk in file.chunks() :
             destination.write(chunk)

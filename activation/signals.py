@@ -1,9 +1,10 @@
+
 from secrets import token_hex
+from django.db.models.signals import post_save
 from django.conf import settings
-from django.db.models.signals import pre_save, post_save
-from django.dispatch import Signal
 from activation.models import Activation
 from activation.helpers.utils import send_activation_email
+from django.dispatch import Signal
 
 
 def inactivate_user(user, *args, **kwargs):

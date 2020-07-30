@@ -1,9 +1,8 @@
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.template.loader import get_template
-from django.shortcuts import reverse
 from django.contrib.sites.models import Site
-
+from django.shortcuts import reverse
 
 def send_register_email(first_name, last_name, email, password):
     login_url = '{HOST}{LOGIN_ROUTE}'.format(
@@ -17,7 +16,6 @@ def send_register_email(first_name, last_name, email, password):
         'last_name': last_name,
         'login_url': login_url
     })
-
     mail = EmailMultiAlternatives(
         'New account',
         email_content,
