@@ -9,6 +9,7 @@ from django import forms
 from activation.signals import set_inactive_user
 from django.contrib.admin.models import LogEntry
 
+
 class MyUserCreationForm(UserCreationForm):
     class Meta:
         model = MyUser
@@ -39,6 +40,7 @@ class MyUserCreationForm(UserCreationForm):
             user.save()
 
         return user
+
 
 class MyUserChangeForm(UserChangeForm):
     class Meta:

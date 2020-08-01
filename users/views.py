@@ -21,11 +21,6 @@ def handle_login(request):
             user = authenticate(request, username=email, password=password)
 
             if user is not None:
-                print('************************')
-                print('************************')
-                print('************************')
-                print('************************')
-                print('settings.DJANGO_AUTH_BACKEND', settings.DJANGO_AUTH_BACKEND)
                 login(request, user, backend=settings.DJANGO_AUTH_BACKEND)
                 return HttpResponseRedirect(reverse('users:profile'))
     else:

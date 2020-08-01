@@ -8,7 +8,7 @@ from django.utils import timezone
 from activation.models import AVAILABILITY_UNIT,AVAILABILITY_VALUE, AVAILABILITY
 
 
-domain = Site.objects.get_current().domain
+# domain = Site.objects.get_current().domain
 
 def send_activation_email(activation):
     user = activation.user
@@ -36,6 +36,7 @@ def send_activation_email(activation):
     )
     mail.content_subtype = 'html'
     mail.send()
+
 
 def regenerate_activation(activation):
     activation.token = token_hex(16)
